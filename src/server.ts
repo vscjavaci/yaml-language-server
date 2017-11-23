@@ -77,12 +77,21 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
 		return !!c;
 	}
 
+
+	function generateTriggerCharacters() {
+		let triggerCharacters = [];
+		for(var i = 32; i <= 127; i++){
+			triggerCharacters.push(String.fromCharCode(i));
+		}
+		return triggerCharacters;
+	}
+
 	clientSnippetSupport = hasClientCapability('textDocument', 'completion', 'completionItem', 'snippetSupport');
 	clientDynamicRegisterSupport = hasClientCapability('workspace', 'symbol', 'dynamicRegistration');
 	return {
 		capabilities: {
 			textDocumentSync: documents.syncKind,
-			completionProvider: { resolveProvider: true },
+			completionProvider: { resolveProvider: true, triggerCharacters: generateTriggerCharacters()},
 			hoverProvider: true,
 			documentSymbolProvider: true,
 			documentFormattingProvider: false
