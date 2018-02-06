@@ -8,12 +8,30 @@ import Json = require('jsonc-parser');
 import {JSONSchema, JSONSchemaMap} from '../jsonSchema';
 import URI from 'vscode-uri';
 import Strings = require('../utils/strings');
-import Parser = require('../parser/jsonParser');
 import {SchemaRequestService, WorkspaceContextService, PromiseConstructor, Thenable} from '../yamlLanguageService';
 
 
 import * as nls from 'vscode-nls';
 const localize = nls.loadMessageBundle();
+
+/**
+ * getParseErrorMessage has been removed from jsonc-parser.
+ */
+function getParseErrorMessage(errorCode: Json.ParseErrorCode): string {
+	switch (errorCode) {
+		case Json.ParseErrorCode.InvalidSymbol: return localize('error.invalidSymbol', 'Invalid symbol');
+		case Json.ParseErrorCode.InvalidNumberFormat: return localize('error.invalidNumberFormat', 'Invalid number format');
+		case Json.ParseErrorCode.PropertyNameExpected: return localize('error.propertyNameExpected', 'Property name expected');
+		case Json.ParseErrorCode.ValueExpected: return localize('error.valueExpected', 'Value expected');
+		case Json.ParseErrorCode.ColonExpected: return localize('error.colonExpected', 'Colon expected');
+		case Json.ParseErrorCode.CommaExpected: return localize('error.commaExpected', 'Comma expected');
+		case Json.ParseErrorCode.CloseBraceExpected: return localize('error.closeBraceExpected', 'Closing brace expected');
+		case Json.ParseErrorCode.CloseBracketExpected: return localize('error.closeBracketExpected', 'Closing bracket expected');
+		case Json.ParseErrorCode.EndOfFileExpected: return localize('error.endOfFileExpected', 'End of file expected');
+		default:
+			return '';
+	}
+}
 
 export interface IJSONSchemaService {
 
@@ -368,7 +386,7 @@ export class JSONSchemaService implements IJSONSchemaService {
 				let schemaContent: JSONSchema = {};
 				let jsonErrors = [];
 				schemaContent = Json.parse(content, jsonErrors);
-				let errors = jsonErrors.length ? [localize('json.schema.invalidFormat', 'Unable to parse content from \'{0}\': {1}.', toDisplayString(url), Json.getParseErrorMessage(jsonErrors[0]))] : [];
+				let errors = jsonErrors.length ? [localize('json.schema.invalidFormat', 'Unable to parse content from \'{0}\': {1}.', toDisplayString(url), getParseErrorMessage(jsonErrors[0]))] : [];
 				return new UnresolvedSchema(schemaContent, errors);
 			},
 			(error: any) => {

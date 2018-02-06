@@ -36,11 +36,11 @@ languageService.configure(languageSettings);
 
 suite("Hover Tests", () => {
 
-	
+
 	describe('Yaml Hover with bowerrc', function(){
-		
+
 		describe('doComplete', function(){
-			
+
 			function setup(content: string){
 				return TextDocument.create("file://~/Desktop/vscode-k8s/test.yaml", "yaml", 0, content);
 			}
@@ -48,22 +48,22 @@ suite("Hover Tests", () => {
 			function parseSetup(content: string, position){
 				let testTextDocument = setup(content);
                 let jsonDocument = parseYAML(testTextDocument.getText());
-                return languageService.doHover(testTextDocument, testTextDocument.positionAt(position), jsonDocument, false);
+                return languageService.doHover(testTextDocument, testTextDocument.positionAt(position), jsonDocument);
 			}
 
 			it('Hover on key on root', (done) => {
 				let content = "cwd: test";
 				let hover = parseSetup(content, 1);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
-            
+
             it('Hover on value on root', (done) => {
 				let content = "cwd: test";
 				let hover = parseSetup(content, 6);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 
@@ -71,7 +71,7 @@ suite("Hover Tests", () => {
 				let content = "scripts:\n  postinstall: test";
 				let hover = parseSetup(content, 15);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 
@@ -79,21 +79,21 @@ suite("Hover Tests", () => {
 				let content = "scripts:\n  postinstall: test";
 				let hover = parseSetup(content, 26);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 
             it('Hover works on both root node and child nodes works', (done) => {
 				let content = "scripts:\n  postinstall: test";
-                
+
                 let firstHover = parseSetup(content, 3);
                 firstHover.then(function(result){
                     assert.notEqual(result.contents.length, 0);
                 });
-                
+
                 let secondHover = parseSetup(content, 15);
 				secondHover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 
@@ -101,15 +101,15 @@ suite("Hover Tests", () => {
 				let content = "analytics: true";
 				let hover = parseSetup(content, 3);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
 			});
-			
+
 			it('Hover on multi document', (done) => {
 				let content = '---\nanalytics: true\n...\n---\njson: test\n...';
 				let hover = parseSetup(content, 30);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 		});

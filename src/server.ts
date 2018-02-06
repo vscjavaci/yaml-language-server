@@ -25,7 +25,8 @@ import { getLanguageService as getCustomLanguageService } from './languageServic
 import * as nls from 'vscode-nls';
 import { FilePatternAssociation } from './languageService/services/jsonSchemaService';
 import { parse as parseYAML } from './languageService/parser/yamlParser';
-nls.config(process.env['VSCODE_NLS_CONFIG']);
+
+nls.config(<any>process.env['VSCODE_NLS_CONFIG']);
 
 interface ISchemaAssociations {
 	[pattern: string]: string[];

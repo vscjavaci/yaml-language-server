@@ -36,11 +36,11 @@ languageService.configure(languageSettings);
 
 suite("Hover Tests", () => {
 
-	
+
 	describe('Yaml Hover with composer schema', function(){
-		
+
 		describe('doComplete', function(){
-			
+
 			function setup(content: string){
 				return TextDocument.create("file://~/Desktop/vscode-k8s/test.yaml", "yaml", 0, content);
 			}
@@ -48,22 +48,22 @@ suite("Hover Tests", () => {
 			function parseSetup(content: string, position){
 				let testTextDocument = setup(content);
                 let jsonDocument = parseYAML(testTextDocument.getText());
-                return languageService.doHover(testTextDocument, testTextDocument.positionAt(position), jsonDocument, false);
+                return languageService.doHover(testTextDocument, testTextDocument.positionAt(position), jsonDocument);
 			}
 
             it('Hover works on array nodes', (done) => {
 				let content = "authors:\n  - name: Josh";
 				let hover = parseSetup(content, 14);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
-            
+
             it('Hover works on array nodes 2', (done) => {
 				let content = "authors:\n  - name: Josh\n  - email: jp";
 				let hover = parseSetup(content, 28);
 				hover.then(function(result){
-                    assert.notEqual(result.contents.length, 0);				
+                    assert.notEqual(result.contents.length, 0);
 				}).then(done, done);
             });
 		});

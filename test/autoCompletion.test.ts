@@ -36,11 +36,11 @@ languageService.configure(languageSettings);
 
 suite("Auto Completion Tests", () => {
 
-	
+
 	describe('yamlCompletion with bowerrc', function(){
-		
+
 		describe('doComplete', function(){
-			
+
 			function setup(content: string){
 				return TextDocument.create("file://~/Desktop/vscode-k8s/test.yaml", "yaml", 0, content);
 			}
@@ -48,14 +48,14 @@ suite("Auto Completion Tests", () => {
 			function parseSetup(content: string, position){
 				let testTextDocument = setup(content);
 				let yDoc = parseYAML(testTextDocument.getText());
-				return completionHelper(testTextDocument, testTextDocument.positionAt(position), false);
+				return completionHelper(testTextDocument, testTextDocument.positionAt(position));
 			}
 
 			it('Autocomplete on root node without word', (done) => {
 				let content = "";
 				let completion = parseSetup(content, 0);
 				completion.then(function(result){
-                    assert.notEqual(result.items.length, 0);				
+                    assert.notEqual(result.items.length, 0);
 				}).then(done, done);
 			});
 
@@ -123,7 +123,7 @@ suite("Auto Completion Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete key in middle of file 2', (done) => {	
+			it('Autocomplete key in middle of file 2', (done) => {
 				let content = "scripts:\n  postinstall: /test\n  preinsta";
 				let completion = parseSetup(content, 31);
 				completion.then(function(result){
@@ -131,7 +131,7 @@ suite("Auto Completion Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete does not happen right after :', (done) => {	
+			it('Autocomplete does not happen right after :', (done) => {
 				let content = "analytics:";
 				let completion = parseSetup(content, 9);
 				completion.then(function(result){
@@ -139,7 +139,7 @@ suite("Auto Completion Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete does not happen right after : under an object', (done) => {	
+			it('Autocomplete does not happen right after : under an object', (done) => {
 				let content = "scripts:\n  postinstall:";
 				let completion = parseSetup(content, 21);
 				completion.then(function(result){
@@ -147,7 +147,7 @@ suite("Auto Completion Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete on multi yaml documents in a single file on root', (done) => {	
+			it('Autocomplete on multi yaml documents in a single file on root', (done) => {
 				let content = `---\nanalytics: true\n...\n---\n...`;
 				let completion = parseSetup(content, 28);
 				completion.then(function(result){
@@ -155,7 +155,7 @@ suite("Auto Completion Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete on multi yaml documents in a single file on scalar', (done) => {	
+			it('Autocomplete on multi yaml documents in a single file on scalar', (done) => {
 				let content = `---\nanalytics: true\n...\n---\njson: \n...`;
 				let completion = parseSetup(content, 34);
 				completion.then(function(result){
@@ -166,12 +166,12 @@ suite("Auto Completion Tests", () => {
 	});
 });
 
-function completionHelper(document: TextDocument, textDocumentPosition, isKubernetes: Boolean){
-	
+function completionHelper(document: TextDocument, textDocumentPosition){
+
 		//Get the string we are looking at via a substring
 		let linePos = textDocumentPosition.line;
 		let position = textDocumentPosition;
-		let lineOffset = getLineOffsets(document.getText()); 
+		let lineOffset = getLineOffsets(document.getText());
 		let start = lineOffset[linePos]; //Start of where the autocompletion is happening
 		let end = 0; //End of where the autocompletion is happening
 		if(lineOffset[linePos+1]){
@@ -184,20 +184,20 @@ function completionHelper(document: TextDocument, textDocumentPosition, isKubern
 		//Check if the string we are looking at is a node
 		if(textLine.indexOf(":") === -1){
 			//We need to add the ":" to load the nodes
-					
+
 			let newText = "";
 
 			//This is for the empty line case
 			let trimmedText = textLine.trim();
 			if(trimmedText.length === 0 || (trimmedText.length === 1 && trimmedText[0] === '-')){
-								
+
 				//Add a temp node that is in the document but we don't use at all.
 				if(lineOffset[linePos+1]){
-					newText = document.getText().substring(0, start+(textLine.length-1)) + "holder:\r\n" + document.getText().substr(end+2); 
+					newText = document.getText().substring(0, start+(textLine.length-1)) + "holder:\r\n" + document.getText().substr(end+2);
 				}else{
-					newText = document.getText().substring(0, start+(textLine.length)) + "holder:\r\n" + document.getText().substr(end+2); 
+					newText = document.getText().substring(0, start+(textLine.length)) + "holder:\r\n" + document.getText().substr(end+2);
 				}
-			
+
 			//For when missing semi colon case
 			}else{
 				//Add a semicolon to the end of the current line so we can validate the node
@@ -208,13 +208,13 @@ function completionHelper(document: TextDocument, textDocumentPosition, isKubern
 				}
 			}
 			let jsonDocument = parseYAML(newText);
-			return languageService.doComplete(document, position, jsonDocument, isKubernetes);
+			return languageService.doComplete(document, position, jsonDocument);
 		}else{
 
 			//All the nodes are loaded
 			position.character = position.character - 1;
 			let jsonDocument = parseYAML(document.getText());
-			return languageService.doComplete(document, position, jsonDocument, isKubernetes);
+			return languageService.doComplete(document, position, jsonDocument);
 		}
 
 }

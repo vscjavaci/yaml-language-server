@@ -26,7 +26,7 @@ let languageService = getLanguageService(schemaRequestService, workspaceContext,
 
 let schemaService = new JSONSchemaService(schemaRequestService, workspaceContext);
 
-let uri = "http://central.maven.org/maven2/io/fabric8/kubernetes-model/2.0.0/kubernetes-model-2.0.0-schema.json";
+let uri = "https://github.com/garethr/openshift-json-schema/blob/master/v3.6.0/all.json";
 let languageSettings = {
 	schemas: [],
 	validate: true
@@ -40,7 +40,7 @@ suite("Kubernetes Integration Tests", () => {
 
 	// Tests for validator
 	describe('Yaml Validation with kubernetes', function() {
-		
+
 		function setup(content: string){
 			return TextDocument.create("file://~/Desktop/vscode-k8s/test.yaml", "yaml", 0, content);
 		}
@@ -48,12 +48,12 @@ suite("Kubernetes Integration Tests", () => {
 		function parseSetup(content: string){
 			let testTextDocument = setup(content);
 			let yDoc = parseYAML(testTextDocument.getText());
-			return languageService.doValidation(testTextDocument, yDoc, true);
+			return languageService.doValidation(testTextDocument, yDoc);
 		}
 
 		//Validating basic nodes
 		describe('Test that validation does not throw errors', function(){
-			
+
 			it('Basic test', (done) => {
 				let content = `apiVersion: v1`;
 				let validator = parseSetup(content);
@@ -84,7 +84,7 @@ suite("Kubernetes Integration Tests", () => {
 				validator.then(function(result){
 					assert.equal(result.length, 0);
 				}).then(done, done);
-			});	
+			});
 
 			describe('Type tests', function(){
 
@@ -110,7 +110,7 @@ suite("Kubernetes Integration Tests", () => {
 					validator.then(function(result){
 						assert.equal(result.length, 0);
 					}).then(done, done);
-				});			
+				});
 
 				it('Type Object does not error on valid node', (done) => {
 					let content = `metadata:\n  clusterName: tes`;
@@ -118,7 +118,7 @@ suite("Kubernetes Integration Tests", () => {
 					validator.then(function(result){
 						assert.equal(result.length, 0);
 					}).then(done, done);
-				});		
+				});
 
 				it('Type Array does not error on valid node', (done) => {
 					let content = `items:\n  - test: test`;
@@ -127,10 +127,10 @@ suite("Kubernetes Integration Tests", () => {
 						assert.equal(result.length, 0);
 					}).then(done, done);
 				});
-				
+
 			});
 
-		});	
+		});
 
 		describe('Test that validation DOES throw errors', function(){
 			it('Error when theres a finished untyped item', (done) => {
@@ -190,13 +190,13 @@ suite("Kubernetes Integration Tests", () => {
 			});
 
 		});
-	
+
 	});
 
 	describe('yamlCompletion with kubernetes', function(){
-		
+
 		describe('doComplete', function(){
-			
+
 			function setup(content: string){
 				return TextDocument.create("file://~/Desktop/vscode-k8s/test.yaml", "yaml", 0, content);
 			}
@@ -204,14 +204,14 @@ suite("Kubernetes Integration Tests", () => {
 			function parseSetup(content: string, position){
 				let testTextDocument = setup(content);
 				let yDoc = parseYAML(testTextDocument.getText());
-				return completionHelper(testTextDocument, testTextDocument.positionAt(position), false);
+				return completionHelper(testTextDocument, testTextDocument.positionAt(position));
 			}
 
 			it('Autocomplete on root node without word', (done) => {
 				let content = "";
 				let completion = parseSetup(content, 0);
 				completion.then(function(result){
-                    assert.notEqual(result.items.length, 0);				
+                    assert.notEqual(result.items.length, 0);
 				}).then(done, done);
 			});
 
@@ -254,7 +254,7 @@ suite("Kubernetes Integration Tests", () => {
 					assert.equal(result.items.length, 2);
 				}).then(done, done);
 			});
-			
+
 			it('Autocomplete key in middle of file', (done) => {
 				let content = "metadata:\n  nam";
 				let completion = parseSetup(content, 14);
@@ -263,7 +263,7 @@ suite("Kubernetes Integration Tests", () => {
 				}).then(done, done);
 			});
 
-			it('Autocomplete key in middle of file 2', (done) => {	
+			it('Autocomplete key in middle of file 2', (done) => {
 				let content = "metadata:\n  name: test\n  cluster";
 				let completion = parseSetup(content, 31);
 				completion.then(function(result){
@@ -275,12 +275,12 @@ suite("Kubernetes Integration Tests", () => {
 
 });
 
-function completionHelper(document: TextDocument, textDocumentPosition, isKubernetes: Boolean){
-	
+function completionHelper(document: TextDocument, textDocumentPosition){
+
 		//Get the string we are looking at via a substring
 		let linePos = textDocumentPosition.line;
 		let position = textDocumentPosition;
-		let lineOffset = getLineOffsets(document.getText()); 
+		let lineOffset = getLineOffsets(document.getText());
 		let start = lineOffset[linePos]; //Start of where the autocompletion is happening
 		let end = 0; //End of where the autocompletion is happening
 		if(lineOffset[linePos+1]){
@@ -293,20 +293,20 @@ function completionHelper(document: TextDocument, textDocumentPosition, isKubern
 		//Check if the string we are looking at is a node
 		if(textLine.indexOf(":") === -1){
 			//We need to add the ":" to load the nodes
-					
+
 			let newText = "";
 
 			//This is for the empty line case
 			let trimmedText = textLine.trim();
 			if(trimmedText.length === 0 || (trimmedText.length === 1 && trimmedText[0] === '-')){
-								
+
 				//Add a temp node that is in the document but we don't use at all.
 				if(lineOffset[linePos+1]){
-					newText = document.getText().substring(0, start+(textLine.length-1)) + "holder:\r\n" + document.getText().substr(end+2); 
+					newText = document.getText().substring(0, start+(textLine.length-1)) + "holder:\r\n" + document.getText().substr(end+2);
 				}else{
-					newText = document.getText().substring(0, start+(textLine.length)) + "holder:\r\n" + document.getText().substr(end+2); 
+					newText = document.getText().substring(0, start+(textLine.length)) + "holder:\r\n" + document.getText().substr(end+2);
 				}
-			
+
 			//For when missing semi colon case
 			}else{
 				//Add a semicolon to the end of the current line so we can validate the node
@@ -317,13 +317,13 @@ function completionHelper(document: TextDocument, textDocumentPosition, isKubern
 				}
 			}
 			let jsonDocument = parseYAML(newText);
-			return languageService.doComplete(document, position, jsonDocument, isKubernetes);
+			return languageService.doComplete(document, position, jsonDocument);
 		}else{
 
 			//All the nodes are loaded
 			position.character = position.character - 1;
 			let jsonDocument = parseYAML(document.getText());
-			return languageService.doComplete(document, position, jsonDocument, isKubernetes);
+			return languageService.doComplete(document, position, jsonDocument);
 		}
 
 }
