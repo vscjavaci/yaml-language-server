@@ -16,6 +16,7 @@ import {
 import { xhr, XHRResponse, configure as configureHttpRequests, getErrorStatusDescription } from 'request-light';
 import path = require('path');
 import fs = require('fs');
+import _ = require('lodash')
 import URI from './languageService/utils/uri';
 import * as URL from 'url';
 import Strings = require('./languageService/utils/strings');
@@ -445,7 +446,7 @@ function completionHelper(document: TextDocument, textDocumentPosition: Position
 			end = document.getText().length;
 		}
 		let textLine = document.getText().substring(start, end);
-
+		let rightTrimedText = _.trimEnd(textLine, '\r\n');
 		//Check if the string we are looking at is a node
 		if(textLine.indexOf(":") === -1){
 			//We need to add the ":" to load the nodes
@@ -457,17 +458,17 @@ function completionHelper(document: TextDocument, textDocumentPosition: Position
 			if(trimmedText.length === 0 || (trimmedText.length === 1 && trimmedText[0] === '-')){
 				//Add a temp node that is in the document but we don't use at all.
 				if(lineOffset[linePos+1]){
-					newText = document.getText().substring(0, start+(textLine.length-1)) + "holder:\r\n" + document.getText().substr(end+2);
+					newText = document.getText().substring(0, start+(rightTrimedText.length)) + "holder:\r\n" + document.getText().substr(end); 
 				}else{
-					newText = document.getText().substring(0, start+(textLine.length)) + "holder:\r\n" + document.getText().substr(end+2);
+					newText = document.getText().substring(0, start+(rightTrimedText.length)) + "holder:\r\n" + document.getText().substr(end); 
 				}
 			//For when missing semi colon case
 			}else{
 				//Add a semicolon to the end of the current line so we can validate the node
 				if(lineOffset[linePos+1]){
-					newText = document.getText().substring(0, start+(textLine.length-1)) + ":\r\n" + document.getText().substr(end+2);
+					newText = document.getText().substring(0, start+(rightTrimedText.length)) + ":\r\n" + document.getText().substr(end);
 				}else{
-					newText = document.getText().substring(0, start+(textLine.length)) + ":\r\n" + document.getText().substr(end+2);
+					newText = document.getText().substring(0, start+(rightTrimedText.length)) + ":\r\n" + document.getText().substr(end);
 				}
 			}
 
