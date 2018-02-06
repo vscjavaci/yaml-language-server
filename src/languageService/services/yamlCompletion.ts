@@ -16,7 +16,6 @@ import { PromiseConstructor, Thenable } from 'vscode-json-languageservice';
 import { CompletionItem, CompletionItemKind, CompletionList, TextDocument, Position, Range, TextEdit } from 'vscode-languageserver-types';
 
 import * as nls from 'vscode-nls';
-import { KubernetesTransformer } from "../kubernetesTransformer";
 import { matchOffsetToDocument } from '../utils/arrUtils';
 const localize = nls.loadMessageBundle();
 
@@ -56,7 +55,7 @@ export class YAMLCompletion {
 		if(document.getText()[offset] === ":"){
 			return null;
 		}
-		
+
 		let currentDoc = matchOffsetToDocument(offset, doc);
 		if(currentDoc === null){
 			return null;
@@ -99,10 +98,6 @@ export class YAMLCompletion {
 				return null;
 			}
 
-			if(isKubernetes){
-            	schema.schema = KubernetesTransformer.doTransformation(schema.schema);
-        	}
-
 			let collectionPromises: Thenable<any>[] = [];
 
 			let addValue = true;
@@ -137,7 +132,7 @@ export class YAMLCompletion {
 				if (schema) {
 					// property proposals with schema
 					this.getPropertyCompletions(schema, currentDoc, node, addValue, collector);
-				} 
+				}
 
 				let location = node.getPath();
 				this.contributions.forEach((contribution) => {
@@ -158,7 +153,7 @@ export class YAMLCompletion {
 			let types: { [type: string]: boolean } = {};
 			if (schema) {
 				this.getValueCompletions(schema, currentDoc, node, offset, document, collector, types);
-			} 
+			}
 			if (this.contributions.length > 0) {
 				this.getContributedValueCompletions(currentDoc, node, offset, document, collector, collectionPromises);
 			}
@@ -195,7 +190,7 @@ export class YAMLCompletion {
 		let offsetForSeparator = offset;
 		let parentKey: string = null;
 		let valueNode: Parser.ASTNode = null;
-		
+
 		if (node && (node.type === 'string' || node.type === 'number' || node.type === 'boolean')) {
 			offsetForSeparator = node.end;
 			valueNode = node;
@@ -204,7 +199,7 @@ export class YAMLCompletion {
 
 		if(node && node.type === 'null'){
 			let nodeParent = node.parent;
-			
+
 			/*
 			 * This is going to be an object for some reason and we need to find the property
 			 * Its an issue with the null node
@@ -223,7 +218,7 @@ export class YAMLCompletion {
 			this.addSchemaValueCompletions(schema.schema, collector, types);
 			return;
 		}
-		
+
 		if ((node.type === 'property') && offset > (<Parser.PropertyASTNode>node).colonOffset) {
 			let propertyNode = <Parser.PropertyASTNode>node;
 			let valueNode = propertyNode.value;
@@ -265,7 +260,7 @@ export class YAMLCompletion {
 			if (types['null']) {
 				this.addNullValueCompletion(collector);
 			}
-		}		
+		}
 	}
 
 	private getContributedValueCompletions(doc: Parser.JSONDocument, node: Parser.ASTNode, offset: number, document: TextDocument, collector: CompletionsCollector, collectionPromises: Thenable<any>[]) {

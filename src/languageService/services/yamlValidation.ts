@@ -8,11 +8,10 @@ import { JSONSchemaService } from './jsonSchemaService';
 import { JSONDocument, ObjectASTNode, IProblem, ProblemSeverity } from '../parser/jsonParser';
 import { TextDocument, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { PromiseConstructor, Thenable} from '../yamlLanguageService';
-import { KubernetesTransformer } from "../kubernetesTransformer";
 import { LanguageSettings } from 'vscode-yaml-languageservice/lib/yamlLanguageService';
 
 export class YAMLValidation {
-	
+
 	private jsonSchemaService: JSONSchemaService;
 	private promise: PromiseConstructor;
 	private comments: boolean;
@@ -29,7 +28,7 @@ export class YAMLValidation {
 			this.validationEnabled = shouldValidate.validate;
 		}
 	}
-	
+
 	public doValidation(textDocument, yamlDocument, isKubernetes) {
 
 		if(!this.validationEnabled){
@@ -38,11 +37,7 @@ export class YAMLValidation {
 
 		return this.jsonSchemaService.getSchemaForResource(textDocument.uri).then(function (schema) {
 			if (schema) {
-				
-				if(isKubernetes){
-                    schema.schema = KubernetesTransformer.doTransformation(schema.schema);
-                }
-				
+
 				for(let currentYAMLDoc in yamlDocument.documents){
 					let currentDoc = yamlDocument.documents[currentYAMLDoc];
 					let diagnostics = currentDoc.getValidationProblems(schema.schema);
@@ -51,8 +46,8 @@ export class YAMLValidation {
 						currentDoc.errors.push({ location: { start: curDiagnostic.location.start, end: curDiagnostic.location.end }, message: curDiagnostic.message })
 					}
 				}
-				
-				
+
+
 			}
 			var diagnostics = [];
 			var added = {};
